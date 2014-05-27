@@ -160,7 +160,8 @@ header("access-control-allow-origin: *");
 		<!-- <div class="alert alert-success"><strong><span class="glyphicon glyphicon-send"></span> Success! Message sent. (If form ok!)</strong></div>	  
 	    <div class="alert alert-danger"><span class="glyphicon glyphicon-alert"></span><strong> Error! Please check the inputs. (If form error!)</strong></div> -->
 	  </div>
-		  <form role="form" action="http://www.glchriste.com/TutoringApp/appointment.php" method="post" >
+		  <!-- <form role="form" action="http://www.glchriste.com/TutoringApp/appointment.php" method="post" id="appointment_form"> -->
+		  <form role="form" action="" onclick="submitForm()" id="appointment_form">
 		    <div class="col-lg-6">
 		      <div class="well well-sm"><strong><i class="glyphicon glyphicon-ok form-control-feedback"></i> Required Field</strong></div>
 		      <div class="form-group">
@@ -258,6 +259,60 @@ header("access-control-allow-origin: *");
 
 </div>
 <script>
+	function submitForm() {
+		// variable to hold request
+		var request;
+		// bind to the submit event of our form
+		$("#appointment_form").submit(function(event){
+	    	// abort any pending request
+		    if (request) {
+		        request.abort();
+		    }
+		    // setup some local variables
+		    var $form = $(this);
+		    // let's select and cache all the fields
+		    var $inputs = $form.find("input, email, text, select, button, textarea");
+		    // serialize the data in the form
+		    var serializedData = $form.serialize();
+
+		    // let's disable the inputs for the duration of the ajax request
+		    // Note: we disable elements AFTER the form data has been serialized.
+		    // Disabled form elements will not be serialized.
+		    $inputs.prop("disabled", true);
+
+		    // fire off the request to /form.php
+		    request = $.ajax({
+		        url: "/appointment.php",
+		        type: "post",
+		        data: serializedData
+		    });
+
+		    // callback handler that will be called on success
+		    request.done(function (response, textStatus, jqXHR){
+		        // log a message to the console
+		        console.log("Hooray, it worked!");
+		    });
+
+		    // callback handler that will be called on failure
+		    request.fail(function (jqXHR, textStatus, errorThrown){
+		        // log the error to the console
+		        console.error(
+		            "The following error occured: "+
+		            textStatus, errorThrown
+		        );
+		    });
+
+		    // callback handler that will be called regardless
+		    // if the request failed or succeeded
+		    request.always(function () {
+		        // reenable the inputs
+		        $inputs.prop("disabled", false);
+		    });
+
+		    // prevent default posting of form
+		    event.preventDefault();
+		});
+	}
 
 	function selectClass() {
 		$('.dropdown-menu li').click(function(e){
